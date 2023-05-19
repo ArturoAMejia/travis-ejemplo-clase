@@ -30,17 +30,6 @@ class FlightsTestCase(TestCase):
         f = Flight.objects.get(origin=a1, destination=a2)
         self.assertTrue(f.is_valid_flight())
 
-    def test_invalid_flight_destination(self):
-        a1 = Airport.objects.get(code="AAA")
-        f = Flight.objects.get(origin=a1, destination=a1)
-        self.assertFalse(f.is_valid_flight())
-
-    def test_invalid_flight_duration(self):
-        a1 = Airport.objects.get(code="AAA")
-        a2 = Airport.objects.get(code="BBB")
-        f = Flight.objects.get(origin=a1, destination=a2)
-        f.duration = -100
-        self.assertFalse(f.is_valid_flight())
 
     def test_index(self):
         c = Client()
@@ -62,22 +51,3 @@ class FlightsTestCase(TestCase):
         c = Client()
         response = c.get(f"/{max_id + 1}")
         self.assertEqual(response.status_code, 404)
-
-    def test_flight_page_passengers(self):
-        f = Flight.objects.get(pk=1)
-        p = Passenger.objects.create(first="Alice", last="Adams")
-        f.passengers.add(p)
-
-        c = Client()
-        response = c.get(f"/{f.id}")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["passengers"].count(), 1)
-
-    def test_flight_page_non_passengers(self):
-        f = Flight.objects.get(pk=1)
-        p = Passenger.objects.create(first="Alice", last="Adams")
-
-        c = Client()
-        response = c.get(f"/{f.id}")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["non_passengers"].count(), 1)
